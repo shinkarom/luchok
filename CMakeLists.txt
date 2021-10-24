@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.0)
 project(luchok)
 
-set(CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 20)
+
 set(SOURCE_FOLDER source)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY bin)
 find_package(SDL2 REQUIRED)
