@@ -1,3 +1,5 @@
+#include <SDL.h>
+
 #include "screen.h"
 
 static SDL_Window* window;
@@ -38,7 +40,7 @@ void RenderFrame(){
     SDL_RenderClear(renderer);
     SDL_RenderCopy(renderer, texture, NULL, NULL);
     SDL_RenderPresent(renderer);
-    SDL_Delay(2000);
+    SDL_Delay(1000);
 }
 
 void DeleteScreen(){
