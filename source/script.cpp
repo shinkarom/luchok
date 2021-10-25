@@ -17,7 +17,7 @@ void CreateLua(){
     luaL_openlibs(lua);
 
     lua_pushcfunction(lua, LuaClearScreen);
-    lua_setglobal(lua, CLs_FUNCTION);
+    lua_setglobal(lua, CLS_FUNCTION);
 }
 
 bool LoadFile(char* fileName){
@@ -38,6 +38,22 @@ void CallVBlank(){
     if(lua_isfunction(lua, -1)){
         lua_pcall(lua, 0, LUA_MULTRET, 0);
     }
+}
+
+void ProcessDelayTimer(){
+    lua_getglobal(lua, DELAY_TIMER_VARIABLE);
+    delay_timer = lua_tointeger(lua, -1);
+    lua_pop(lua, -1);
+
+    if(delay_timer > 0){
+        delay_timer--;
+    }
+    else if (delay_timer < 0){
+        delay_timer++;
+    }
+
+    lua_pushinteger(lua, delay_timer);
+    lua_setglobal(lua, DELAY_TIMER_VARIABLE);
 }
 
 void DeleteLua(){

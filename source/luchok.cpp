@@ -16,6 +16,7 @@ void ProcessFrames(){
     while(!quit){ 
         next_frame += std::chrono::milliseconds(FRAME_DURATION); 
         //SetPixel(10, 10, !GetPixel(10, 10)); 
+        ProcessDelayTimer();
         CallVBlank();    
         RenderFrame();
         do{
@@ -38,9 +39,12 @@ int main(int argc, char** argv){
             RunLua();
             ProcessFrames();
         }
+        else{
+            std::cout << "Couldn't load " << argv[1] << "." << std::endl;
+        }
     }
     else{
-        std::cout << "Couldn't load " << argv[1] << "." << std::endl;
+        std::cout << "No file provided." << std::endl;
     }
 
     DeleteScreen();
