@@ -12,10 +12,8 @@ void ProcessFrames(){
     SDL_Event event;
     using clock = std::chrono::steady_clock;
     auto next_frame = clock::now();   
-
     while(!quit){ 
         next_frame += std::chrono::milliseconds(FRAME_DURATION); 
-        //SetPixel(10, 10, !GetPixel(10, 10)); 
         ProcessDelayTimer();
         CallVBlank();    
         RenderFrame();

@@ -1,3 +1,5 @@
 function vblank()
-    
+    draw(square, 10, 10, 4)
 end
+
+square = {0xff, 0x0f, 0xf0, 0xaa}

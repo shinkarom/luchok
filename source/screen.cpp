@@ -1,4 +1,5 @@
 #include <SDL.h>
+#include <iostream>
 
 #include "screen.h"
 
@@ -33,6 +34,28 @@ bool GetPixel(int x, int y){
 
 void SetPixel(int x, int y, bool value){
     frameBuffer[y * SCREEN_WIDTH + x] = value ? ON_COLOR : OFF_COLOR;
+}
+
+bool DrawByte(int value, int x, int y){
+    bool result = false;
+    for(int i = 0; i < 8; i++){
+        bool thisBit = (value >> i) & 1;
+        auto thisColor = thisBit ? ON_COLOR : OFF_COLOR;
+        int new_x = (x + i) % SCREEN_WIDTH;
+        int new_y = y % SCREEN_HEIGHT;
+        int loc = new_y * SCREEN_WIDTH + new_x;
+        bool currentBit = frameBuffer[loc] == ON_COLOR;
+        if(!result && currentBit && thisBit)
+        {
+            result = true;
+        }
+        bool newBit = currentBit ^ thisBit;
+        frameBuffer[loc] = newBit ? ON_COLOR : OFF_COLOR;
+       // std::cout << x<< " " << y << " " 
+       //     << currentBit << " " << thisBit << " " << 
+       //     newBit << " " << result << std::endl;
+    }
+    return result;
 }
 
 void ClearScreen(){

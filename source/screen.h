@@ -3,13 +3,14 @@
 #include <cstdint>
 #include "common.h"
 
-constexpr int FRAME_DURATION = 1000 / 60;
+constexpr int FRAME_DURATION = 1000 / FRAMERATE;
 constexpr uint32_t ON_COLOR = 0xFFFFFFFF;
 constexpr uint32_t OFF_COLOR = 0x000000FF;
 
 bool GetPixel(int x, int y);
 void SetPixel(int x, int y, bool value);
 void ClearScreen();
+bool DrawByte(int value, int x, int y);
 
 void CreateScreen();
 void RenderFrame();

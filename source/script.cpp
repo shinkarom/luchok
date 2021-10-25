@@ -12,12 +12,31 @@ int LuaClearScreen(lua_State *L){
     return 0;
 }
 
+int LuaDraw(lua_State* L){
+    int count = luaL_checkinteger(lua, -1);
+    int y = luaL_checkinteger(lua, -2);
+    int x = luaL_checkinteger(lua, -3);
+    lua_pop(lua, 3);
+    //std::cout << count<<" "<<x<<" "<<y << std::endl;
+    for(int i = 1; i <= count; i++){
+        lua_geti(lua, -1, i);
+        int b = luaL_checkinteger(lua, -1);
+        std::cout<<x<<" "<<y<<" "<<b<<std::endl;
+        DrawByte(b, x, y+i-1);
+        lua_pop(lua, 1);
+    }
+    lua_pop(lua, 3);
+    return 1;
+}
+
 void CreateLua(){
     lua = luaL_newstate();
     luaL_openlibs(lua);
 
     lua_pushcfunction(lua, LuaClearScreen);
     lua_setglobal(lua, CLS_FUNCTION);
+    lua_pushcfunction(lua, LuaDraw);
+    lua_setglobal(lua, DRAW_FUNCTION);
 }
 
 bool LoadFile(char* fileName){
