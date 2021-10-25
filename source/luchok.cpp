@@ -2,32 +2,42 @@
 #include <chrono>
 #include <thread>
 
-#include <lua.hpp>
 #include <SDL.h>
 
 #include "screen.h"
 #include "script.h"
 
-int main(int argc, char** argv){
+void ProcessFrames(){
     bool quit = false;
     SDL_Event event;
-
-    std::cout << "Luchok\n";
-    CreateLua();
-    CreateScreen();
-
     using clock = std::chrono::steady_clock;
-    auto next_frame = clock::now();    
+    auto next_frame = clock::now();   
+
     while(!quit){  
-        next_frame += std::chrono::milliseconds(FRAME_DURATION);
+        next_frame += std::chrono::milliseconds(FRAME_DURATION); 
+        //SetPixel(10, 10, !GetPixel(10, 10));     
         RenderFrame();
         do{
-            SDL_PollEvent(&event);
+            SDL_WaitEventTimeout(&event, 2);
             if(event.type == SDL_QUIT){
                 quit = true;
             }
         }  while ((!quit) && (clock::now() < next_frame));   
-    }  
+    } 
+}
+
+int main(int argc, char** argv){
+    std::cout << "Luchok\n";
+    CreateLua();
+    CreateScreen();
+
+    if(argc > 1){
+       if(LoadFile(argv[1])){
+           std::cout << argv[1] << " loaded successfully." << std::endl;
+       }
+    }
+
+    ProcessFrames();
 
     DeleteScreen();
     DeleteLua();

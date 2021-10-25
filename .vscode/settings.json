@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "*.luchok": "lua",
+        "chrono": "cpp"
+    }
+}
