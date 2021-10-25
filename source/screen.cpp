@@ -35,6 +35,12 @@ void SetPixel(int x, int y, bool value){
     frameBuffer[y * SCREEN_WIDTH + x] = value ? ON_COLOR : OFF_COLOR;
 }
 
+void ClearScreen(){
+    for(int i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; i++){
+        frameBuffer[i] = OFF_COLOR;
+    }
+}
+
 void RenderFrame(){
     SDL_UpdateTexture(texture, NULL, frameBuffer, 
         SCREEN_WIDTH * sizeof(uint32_t));

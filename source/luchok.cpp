@@ -13,9 +13,10 @@ void ProcessFrames(){
     using clock = std::chrono::steady_clock;
     auto next_frame = clock::now();   
 
-    while(!quit){  
+    while(!quit){ 
         next_frame += std::chrono::milliseconds(FRAME_DURATION); 
-        //SetPixel(10, 10, !GetPixel(10, 10));     
+        //SetPixel(10, 10, !GetPixel(10, 10)); 
+        CallVBlank();    
         RenderFrame();
         do{
             SDL_WaitEventTimeout(&event, 2);
@@ -32,14 +33,18 @@ int main(int argc, char** argv){
     CreateScreen();
 
     if(argc > 1){
-       if(LoadFile(argv[1])){
-           std::cout << argv[1] << " loaded successfully." << std::endl;
-       }
+        if(LoadFile(argv[1])){
+            std::cout << argv[1] << " loaded successfully." << std::endl;
+            RunLua();
+            ProcessFrames();
+        }
     }
-
-    ProcessFrames();
+    else{
+        std::cout << "Couldn't load " << argv[1] << "." << std::endl;
+    }
 
     DeleteScreen();
     DeleteLua();
+   
     return 0;
 }
