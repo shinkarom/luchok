@@ -1,3 +1,5 @@
+#include <cstdlib>
+#include <ctime>
 #include "script.h"
 #include "common.h"
 
@@ -67,6 +69,17 @@ int LuaDrawFont(lua_State* L){
     return 1;
 }
 
+int LuaRnd(lua_State* L){
+    int value = luaL_checkinteger(lua, -1);
+    lua_pop(lua, 1);
+
+    int r = rand() % 256;
+    int new_num = r & value;
+
+    lua_pushinteger(lua, new_num);
+    return 1;
+}
+
 void CreateLua(){
     lua = luaL_newstate();
     luaL_openlibs(lua);
@@ -77,6 +90,8 @@ void CreateLua(){
     lua_setglobal(lua, DRAW_FUNCTION);
     lua_pushcfunction(lua, LuaDrawFont);
     lua_setglobal(lua, DRAW_FONT_FUNCTION);
+    lua_pushcfunction(lua, LuaRnd);
+    lua_setglobal(lua, RND_FUNCTION);
 }
 
 bool LoadFile(char* fileName){

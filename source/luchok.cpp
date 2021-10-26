@@ -1,6 +1,8 @@
 #include <iostream>
 #include <chrono>
 #include <thread>
+#include <cstdlib>
+#include <ctime>
 
 #include <SDL.h>
 
@@ -29,6 +31,9 @@ void ProcessFrames(){
 
 int main(int argc, char** argv){
     std::cout << "Luchok\n";
+
+    srand(time(0));
+
     CreateLua();
     CreateScreen();
 

@@ -1,4 +1,6 @@
+num = rnd(31)
+
 function vblank()
-    draw_font(0x3, 20, 20)
-    draw_font(0x7, 28, 20)
+    draw_font(0x3, 20, num)
+    draw_font(0x7, 28, num)
 end
