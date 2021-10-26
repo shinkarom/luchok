@@ -1,6 +1,9 @@
 num = rnd(31)
 
 function vblank()
-    draw_font(0x3, 20, num)
-    draw_font(0x7, 28, num)
+    if get_key(9) then
+        draw_font(0x1, 10, 10)
+    else
+        draw_font(0, 10, 10)
+    end
 end

@@ -8,6 +8,7 @@
 
 #include "screen.h"
 #include "script.h"
+#include "keys.h"
 
 void ProcessFrames(){
     bool quit = false;

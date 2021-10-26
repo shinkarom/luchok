@@ -5,6 +5,7 @@
 
 #include "lua.hpp"
 #include "screen.h"
+#include "keys.h"
 #include <iostream>
 
 const int font[16][5] = {
@@ -80,18 +81,57 @@ int LuaRnd(lua_State* L){
     return 1;
 }
 
+static void dumpstack (lua_State *L) {
+  int top=lua_gettop(L);
+  for (int i=1; i <= top; i++) {
+    printf("%d\t%s\t", i, luaL_typename(L,i));
+    switch (lua_type(L, i)) {
+      case LUA_TNUMBER:
+        printf("%g\n",lua_tonumber(L,i));
+        break;
+      case LUA_TSTRING:
+        printf("%s\n",lua_tostring(L,i));
+        break;
+      case LUA_TBOOLEAN:
+        printf("%s\n", (lua_toboolean(L, i) ? "true" : "false"));
+        break;
+      case LUA_TNIL:
+        printf("%s\n", "nil");
+        break;
+      default:
+        printf("%p\n",lua_topointer(L,i));
+        break;
+    }
+  }
+}
+
+int LuaGetKey(lua_State* L){
+    int result = 0;
+    int value = luaL_checkinteger(lua, -1);
+   // lua_pop(lua, 1);
+
+    const Uint8 *state = SDL_GetKeyboardState(NULL);
+    if(state[keys[value]]){
+        result = 1;
+    }
+    else{
+        result = 0;
+    }
+    lua_pushboolean(lua, result);
+   // dumpstack(lua);
+   // std::cout<<"-----"<<std::endl;
+    return 1;
+}
+
 void CreateLua(){
     lua = luaL_newstate();
     luaL_openlibs(lua);
 
-    lua_pushcfunction(lua, LuaClearScreen);
-    lua_setglobal(lua, CLS_FUNCTION);
-    lua_pushcfunction(lua, LuaDraw);
-    lua_setglobal(lua, DRAW_FUNCTION);
-    lua_pushcfunction(lua, LuaDrawFont);
-    lua_setglobal(lua, DRAW_FONT_FUNCTION);
-    lua_pushcfunction(lua, LuaRnd);
-    lua_setglobal(lua, RND_FUNCTION);
+    lua_register(lua, CLS_FUNCTION, LuaClearScreen);
+    lua_register(lua, DRAW_FUNCTION, LuaDraw);
+    lua_register(lua, DRAW_FONT_FUNCTION, LuaDrawFont);
+    lua_register(lua, RND_FUNCTION, LuaRnd);
+    lua_register(lua, GET_KEY_FUNCTION, LuaGetKey);
 }
 
 bool LoadFile(char* fileName){
