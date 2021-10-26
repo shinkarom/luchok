@@ -39,7 +39,7 @@ void SetPixel(int x, int y, bool value){
 bool DrawByte(int value, int x, int y){
     bool result = false;
     for(int i = 0; i < 8; i++){
-        bool thisBit = (value >> i) & 1;
+        bool thisBit = (value >> (7 - i)) & 1;
         auto thisColor = thisBit ? ON_COLOR : OFF_COLOR;
         int new_x = (x + i) % SCREEN_WIDTH;
         int new_y = y % SCREEN_HEIGHT;
@@ -51,9 +51,9 @@ bool DrawByte(int value, int x, int y){
         }
         bool newBit = currentBit ^ thisBit;
         frameBuffer[loc] = newBit ? ON_COLOR : OFF_COLOR;
-       // std::cout << x<< " " << y << " " 
-       //     << currentBit << " " << thisBit << " " << 
-       //     newBit << " " << result << std::endl;
+        //std::cout << x<< " " << y << " " 
+        //    << currentBit << " " << thisBit << " " << 
+        //    newBit << " " << result << std::endl;
     }
     return result;
 }

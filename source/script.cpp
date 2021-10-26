@@ -5,6 +5,25 @@
 #include "screen.h"
 #include <iostream>
 
+const int font[16][5] = {
+    {0xF0, 0x90, 0x90, 0x90, 0xF0}, //0
+    {0x20, 0x60, 0x20, 0x20, 0x70}, //1
+    {0xF0, 0x10, 0xF0, 0x80, 0xF0}, //2
+    {0xF0, 0x10, 0xF0, 0x10, 0xF0}, //3
+    {0x90, 0x90, 0xF0, 0x10, 0x10}, //4
+    {0xF0, 0x80, 0xF0, 0x10, 0xF0}, //5
+    {0xF0, 0x80, 0xF0, 0x90, 0xF0}, //6
+    {0xF0, 0x10, 0x20, 0x40, 0x40}, //7
+    {0xF0, 0x90, 0xF0, 0x90, 0xF0}, //8
+    {0xF0, 0x90, 0xF0, 0x10, 0xF0}, //9
+    {0xF0, 0x90, 0xF0, 0x90, 0x90}, //A
+    {0xE0, 0x90, 0xE0, 0x90, 0xE0}, //B
+    {0xF0, 0x80, 0x80, 0x80, 0xF0}, //C
+    {0xE0, 0x90, 0x90, 0x90, 0xE0}, //D
+    {0xF0, 0x80, 0xF0, 0x80, 0xF0}, //E
+    {0xF0, 0x80, 0xF0, 0x80, 0x80}, //F
+    };
+
 lua_State* lua;
 
 int LuaClearScreen(lua_State *L){
@@ -13,19 +32,38 @@ int LuaClearScreen(lua_State *L){
 }
 
 int LuaDraw(lua_State* L){
+    bool result = false;
     int count = luaL_checkinteger(lua, -1);
     int y = luaL_checkinteger(lua, -2);
     int x = luaL_checkinteger(lua, -3);
     lua_pop(lua, 3);
-    //std::cout << count<<" "<<x<<" "<<y << std::endl;
     for(int i = 1; i <= count; i++){
         lua_geti(lua, -1, i);
         int b = luaL_checkinteger(lua, -1);
-        std::cout<<x<<" "<<y<<" "<<b<<std::endl;
-        DrawByte(b, x, y+i-1);
+        if(!result && DrawByte(b, x, y+i-1)){
+            result = true;
+        }
         lua_pop(lua, 1);
     }
+    lua_pop(lua, 1);
+    lua_pushinteger(lua, result ? 1 : 0);
+    return 1;
+}
+
+int LuaDrawFont(lua_State* L){
+    bool result = false;
+    int y = luaL_checkinteger(lua, -1);
+    int x = luaL_checkinteger(lua, -2);
+    int index = luaL_checkinteger(lua, -3);
+
+    for(int i = 0; i < 5; i++){
+        if(!result && DrawByte(font[index][i], x, y + i)){
+            result = true;
+        }
+    }
+
     lua_pop(lua, 3);
+    lua_pushinteger(lua, result ? 1 : 0);
     return 1;
 }
 
@@ -37,6 +75,8 @@ void CreateLua(){
     lua_setglobal(lua, CLS_FUNCTION);
     lua_pushcfunction(lua, LuaDraw);
     lua_setglobal(lua, DRAW_FUNCTION);
+    lua_pushcfunction(lua, LuaDrawFont);
+    lua_setglobal(lua, DRAW_FONT_FUNCTION);
 }
 
 bool LoadFile(char* fileName){

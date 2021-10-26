@@ -1,5 +1,4 @@
 function vblank()
-    draw(square, 10, 10, 4)
+    draw_font(0x3, 20, 20)
+    draw_font(0x7, 28, 20)
 end
-
-square = {0xff, 0x0f, 0xf0, 0xaa}
