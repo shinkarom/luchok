@@ -6,6 +6,7 @@
 #include "lua.hpp"
 #include "screen.h"
 #include "keys.h"
+#include "sound.h"
 #include <iostream>
 
 const int font[16][5] = {
@@ -49,7 +50,7 @@ int LuaDraw(lua_State* L){
         lua_pop(lua, 1);
     }
     lua_pop(lua, 1);
-    lua_pushinteger(lua, result ? 1 : 0);
+    lua_pushboolean(lua, result);
     return 1;
 }
 
@@ -66,7 +67,7 @@ int LuaDrawFont(lua_State* L){
     }
 
     lua_pop(lua, 3);
-    lua_pushinteger(lua, result ? 1 : 0);
+    lua_pushboolean(lua, result);
     return 1;
 }
 
@@ -108,7 +109,7 @@ static void dumpstack (lua_State *L) {
 int LuaGetKey(lua_State* L){
     int result = 0;
     int value = luaL_checkinteger(lua, -1);
-   // lua_pop(lua, 1);
+    lua_pop(lua, 1);
 
     const Uint8 *state = SDL_GetKeyboardState(NULL);
     if(state[keys[value]]){
@@ -157,7 +158,7 @@ void CallVBlank(){
 void ProcessDelayTimer(){
     lua_getglobal(lua, DELAY_TIMER_VARIABLE);
     delay_timer = lua_tointeger(lua, -1);
-    lua_pop(lua, -1);
+    lua_pop(lua, 1);
 
     if(delay_timer > 0){
         delay_timer--;
@@ -165,9 +166,32 @@ void ProcessDelayTimer(){
     else if (delay_timer < 0){
         delay_timer++;
     }
-
+   // std::cout<<"delay_timer "<<delay_timer<<std::endl;
     lua_pushinteger(lua, delay_timer);
     lua_setglobal(lua, DELAY_TIMER_VARIABLE);
+}
+
+void ProcessSoundTimer(){
+    lua_getglobal(lua, SOUND_TIMER_VARIABLE);
+    sound_timer = lua_tointeger(lua, -1);
+    lua_pop(lua, 1);
+
+    if(sound_timer > 0){
+        sound_timer--;
+    }
+    else if (sound_timer < 0){
+        sound_timer++;
+    }
+
+    if(sound_timer != 0){
+        UnpauseSound();
+    }
+    else{
+        PauseSound();
+    }
+   // std::cout<<"sound_timer "<<sound_timer<<std::endl;
+    lua_pushinteger(lua, sound_timer);
+    lua_setglobal(lua, SOUND_TIMER_VARIABLE);
 }
 
 void DeleteLua(){

@@ -9,6 +9,7 @@
 #include "screen.h"
 #include "script.h"
 #include "keys.h"
+#include "sound.h"
 
 void ProcessFrames(){
     bool quit = false;
@@ -17,8 +18,10 @@ void ProcessFrames(){
     auto next_frame = clock::now();   
     while(!quit){ 
         next_frame += std::chrono::milliseconds(FRAME_DURATION); 
+        QueueSound();
         ClearScreen();
         ProcessDelayTimer();
+        ProcessSoundTimer();
         CallVBlank();    
         RenderFrame();
         do{
@@ -26,7 +29,8 @@ void ProcessFrames(){
             if(event.type == SDL_QUIT){
                 quit = true;
             }
-        }  while ((!quit) && (clock::now() < next_frame));   
+        }  while ((!quit) && (clock::now() < next_frame)); 
+        //std::cout<<"-----"<<std::endl;  
     } 
 }
 
@@ -35,8 +39,11 @@ int main(int argc, char** argv){
 
     srand(time(0));
 
+    SDL_Init(SDL_INIT_AUDIO);
+
     CreateLua();
     CreateScreen();
+    CreateSound();
 
     if(argc > 1){
         if(LoadFile(argv[1])){
@@ -52,8 +59,11 @@ int main(int argc, char** argv){
         std::cout << "No file provided." << std::endl;
     }
 
+    DeleteSound();
     DeleteScreen();
     DeleteLua();
-   
+
+    SDL_Quit();
+
     return 0;
 }

@@ -3,7 +3,6 @@
 #include <cstdint>
 #include "common.h"
 
-constexpr int FRAME_DURATION = 1000 / FRAMERATE;
 constexpr uint32_t ON_COLOR = 0xFFFFFFFF;
 constexpr uint32_t OFF_COLOR = 0x000000FF;
 
