@@ -1,12 +1,7 @@
-num = rnd(31)
-play = false
-delay_timer = 60
-function vblank()   
-    if delay_timer == 0 then
-        delay_timer = 60
-        play = not play
-        if play then
-            sound_timer = 60
-        end
-    end
+decim = bcd(0xAF)
+
+function vblank()     
+    draw_font(decim[1], 10, 10)
+    draw_font(decim[2], 15, 10)
+    draw_font(decim[3], 20, 10)
 end

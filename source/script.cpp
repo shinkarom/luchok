@@ -124,6 +124,19 @@ int LuaGetKey(lua_State* L){
     return 1;
 }
 
+int LuaBcd(lua_State* L){
+    int value = luaL_checkinteger(lua, -1);
+    lua_pop(lua, 1);
+    lua_newtable(lua);
+    lua_pushinteger(lua, value / 100);
+    lua_seti(lua, -2, 1);
+    lua_pushinteger(lua, (value / 10) % 10);
+    lua_seti(lua, -2, 2);
+    lua_pushinteger(lua, value % 10);
+    lua_seti(lua, -2, 3);
+    return 1;
+}
+
 void CreateLua(){
     lua = luaL_newstate();
     luaL_openlibs(lua);
@@ -133,6 +146,7 @@ void CreateLua(){
     lua_register(lua, DRAW_FONT_FUNCTION, LuaDrawFont);
     lua_register(lua, RND_FUNCTION, LuaRnd);
     lua_register(lua, GET_KEY_FUNCTION, LuaGetKey);
+    lua_register(lua, BCD_FUNCTION, LuaBcd);
 }
 
 bool LoadFile(char* fileName){

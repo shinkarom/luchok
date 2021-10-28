@@ -12,6 +12,7 @@ static const char* DRAW_FUNCTION = "draw";
 static const char* DRAW_FONT_FUNCTION = "draw_font";
 static const char* RND_FUNCTION = "rnd";
 static const char* GET_KEY_FUNCTION = "get_key";
+static const char* BCD_FUNCTION = "bcd";
 static const char* DELAY_TIMER_VARIABLE = "delay_timer";
 static const char* SOUND_TIMER_VARIABLE = "sound_timer";
 
