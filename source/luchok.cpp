@@ -17,11 +17,12 @@ void ProcessFrames(){
     using clock = std::chrono::steady_clock;
     auto next_frame = clock::now();   
     while(!quit){ 
-        next_frame += std::chrono::milliseconds(FRAME_DURATION); 
-        QueueSound();
+        next_frame += std::chrono::milliseconds(FRAME_DURATION);   
         ClearScreen();
         ProcessDelayTimer();
+        QueueSound();
         ProcessSoundTimer();
+        ProcessKeys();
         CallVBlank();    
         RenderFrame();
         do{

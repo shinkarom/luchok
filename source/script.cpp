@@ -37,12 +37,15 @@ int LuaClearScreen(lua_State *L){
 
 int LuaDraw(lua_State* L){
     bool result = false;
-    int count = luaL_checkinteger(lua, -1);
-    int y = luaL_checkinteger(lua, -2);
-    int x = luaL_checkinteger(lua, -3);
-    lua_pop(lua, 3);
-    for(int i = 1; i <= count; i++){
+    int y = luaL_checkinteger(lua, -1);
+    int x = luaL_checkinteger(lua, -2);
+    lua_pop(lua, 2);
+    for(int i = 1; i <= SCREEN_HEIGHT; i++){
         lua_geti(lua, -1, i);
+        if(lua_isnil(lua, -1)){
+            lua_pop(lua, 2);
+            break;
+        }
         int b = luaL_checkinteger(lua, -1);
         if(!result && DrawByte(b, x, y+i-1)){
             result = true;
@@ -50,23 +53,6 @@ int LuaDraw(lua_State* L){
         lua_pop(lua, 1);
     }
     lua_pop(lua, 1);
-    lua_pushboolean(lua, result);
-    return 1;
-}
-
-int LuaDrawFont(lua_State* L){
-    bool result = false;
-    int y = luaL_checkinteger(lua, -1);
-    int x = luaL_checkinteger(lua, -2);
-    int index = luaL_checkinteger(lua, -3);
-
-    for(int i = 0; i < 5; i++){
-        if(!result && DrawByte(font[index][i], x, y + i)){
-            result = true;
-        }
-    }
-
-    lua_pop(lua, 3);
     lua_pushboolean(lua, result);
     return 1;
 }
@@ -106,21 +92,25 @@ static void dumpstack (lua_State *L) {
   }
 }
 
-int LuaGetKey(lua_State* L){
+int LuaKeyPressed(lua_State* L){
     int result = 0;
     int value = luaL_checkinteger(lua, -1);
     lua_pop(lua, 1);
+    if(value < 0 || value > 15){
+        return luaL_error(lua, "Key being checked is out of the range 0-15");
+    }
+    lua_pushboolean(lua, IsKeyPressed(value));
+    return 1;
+}
 
-    const Uint8 *state = SDL_GetKeyboardState(NULL);
-    if(state[keys[value]]){
-        result = 1;
+int LuaKeyReleased(lua_State* L){
+    int result = 0;
+    int value = luaL_checkinteger(lua, -1);
+    lua_pop(lua, 1);
+    if(value < 0 || value > 15){
+        return luaL_error(lua, "Key being checked is out of the range 0-15");
     }
-    else{
-        result = 0;
-    }
-    lua_pushboolean(lua, result);
-   // dumpstack(lua);
-   // std::cout<<"-----"<<std::endl;
+    lua_pushboolean(lua, IsKeyReleased(value));
     return 1;
 }
 
@@ -137,16 +127,31 @@ int LuaBcd(lua_State* L){
     return 1;
 }
 
+int LuaGetSprite(lua_State* L){
+    int value = luaL_checkinteger(lua, -1);
+    lua_pop(lua, 1);
+    if(value < 0 || value > 15){
+        return luaL_error(lua, "The value for get_sprite is not between 0 and 15");
+    }
+    lua_createtable(lua, 5, 0);
+    for(int i = 1; i <= 5; i++){
+        lua_pushinteger(lua, font[value][i-1]);
+        lua_seti(lua, -2, i);
+    }
+    return 1;
+}
+
 void CreateLua(){
     lua = luaL_newstate();
     luaL_openlibs(lua);
 
     lua_register(lua, CLS_FUNCTION, LuaClearScreen);
     lua_register(lua, DRAW_FUNCTION, LuaDraw);
-    lua_register(lua, DRAW_FONT_FUNCTION, LuaDrawFont);
     lua_register(lua, RND_FUNCTION, LuaRnd);
-    lua_register(lua, GET_KEY_FUNCTION, LuaGetKey);
+    lua_register(lua, KEY_PRESSED_FUNCTION, LuaKeyPressed);
+    lua_register(lua, KEY_RELEASED_FUNCTION, LuaKeyReleased);
     lua_register(lua, BCD_FUNCTION, LuaBcd);
+    lua_register(lua, GET_SPRITE_FUNCTION, LuaGetSprite);
 }
 
 bool LoadFile(char* fileName){
