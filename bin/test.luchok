@@ -4,6 +4,8 @@ dx = 1
 dy = 1
 frames = 0
 speed = 20
+delay_timer = 128
+sound_timer = 128
 function vblank()   
     frames = frames + 1
     if frames % (60 / speed) == 0 then

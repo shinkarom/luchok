@@ -10,9 +10,10 @@
 #include "script.h"
 #include "keys.h"
 #include "sound.h"
+bool quit;
 
 void ProcessFrames(){
-    bool quit = false;
+    quit = false;
     SDL_Event event;
     using clock = std::chrono::steady_clock;
     auto next_frame = clock::now();   
@@ -20,10 +21,10 @@ void ProcessFrames(){
         next_frame += std::chrono::milliseconds(FRAME_DURATION);   
         ClearScreen();
         ProcessDelayTimer();
-        QueueSound();
+        //QueueSound();
         ProcessSoundTimer();
         ProcessKeys();
-        CallVBlank();    
+        CallVBlank();  
         RenderFrame();
         do{
             SDL_WaitEventTimeout(&event, 2);
@@ -49,7 +50,6 @@ int main(int argc, char** argv){
     if(argc > 1){
         if(LoadFile(argv[1])){
             std::cout << argv[1] << " loaded successfully." << std::endl;
-            RunLua();
             ProcessFrames();
         }
         else{

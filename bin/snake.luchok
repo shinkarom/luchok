@@ -1,0 +1,76 @@
+speed = 5
+frames = 0
+segments = {}
+food = {}
+direction = {dx = 1, dy = 0}
+
+for i = 1,3 do
+    segments[i] = { x = 10 - i + 1, y = 10}
+end
+
+function occupied(xx, yy)
+    for i = 1, #segments do
+        if (xx == segments[i].x) and (yy == segments[i].y) then return true end
+    end
+    return false
+end
+
+function generate_food()
+    x = rnd(64)
+    y = rnd(32)
+    while occupied(x, y) do
+        x = rnd(64)
+        y = rnd(32)
+    end
+    food.x = x
+    food.y = y
+end
+
+generate_food()
+
+function move_snake()
+    for i = #segments - 1, 1, -1 do
+        segments[i+1].x = segments[i].x
+        segments[i+1].y = segments[i].y
+    end
+    segments[1].x = segments[1].x + direction.dx
+    segments[1].y = segments[1].y + direction.dy
+end
+
+function process_input()
+    if key_released(8) and direction.dy == 0 then
+        direction.dy = 1
+        direction.dx = 0
+    end
+    if key_released(2) and direction.dy == 0 then
+        direction.dy = -1
+        direction.dx = 0
+    end
+    if key_released(4) and direction.dx == 0 then
+        direction.dx = -1
+        direction.dy = 0
+    end
+    if key_released(6) and direction.dx == 0 then
+        direction.dx = 1
+        direction.dy = 0
+    end 
+end
+
+function vblank()
+    frames = frames + 1
+    if frames % (60 / speed) == 0 then
+        move_snake()
+    end
+    process_input()
+    draw_it()
+end
+
+function draw_it()
+    for i = 1, #segments do
+        draw(segment, segments[i].x, segments[i].y)
+    end
+    draw(food_sprite, food.x, food.y)
+end
+
+segment = {0x01}
+food_sprite = {0x01}

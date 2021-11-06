@@ -42,7 +42,13 @@ bool DrawByte(int value, int x, int y){
         bool thisBit = (value >> (7 - i)) & 1;
         auto thisColor = thisBit ? ON_COLOR : OFF_COLOR;
         int new_x = (x + i) % SCREEN_WIDTH;
+        if(new_x < 0){
+            new_x = SCREEN_WIDTH - (-new_x);
+        }
         int new_y = y % SCREEN_HEIGHT;
+        if(new_y < 0){
+            new_y = SCREEN_HEIGHT - (-new_y);
+        }
         int loc = new_y * SCREEN_WIDTH + new_x;
         bool currentBit = frameBuffer[loc] == ON_COLOR;
         if(!result && currentBit && thisBit)

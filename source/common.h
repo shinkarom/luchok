@@ -17,5 +17,6 @@ static const char* GET_SPRITE_FUNCTION = "get_sprite";
 static const char* DELAY_TIMER_VARIABLE = "delay_timer";
 static const char* SOUND_TIMER_VARIABLE = "sound_timer";
 
-static int delay_timer = 0;
-static int sound_timer = 0;
+extern int delay_timer;
+extern int sound_timer;
+extern bool quit;

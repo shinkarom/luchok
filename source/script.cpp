@@ -1,4 +1,5 @@
-#include <cstdlib>
+#include <random>
+#include <functional>
 #include <ctime>
 #include "script.h"
 #include "common.h"
@@ -30,23 +31,61 @@ const int font[16][5] = {
 
 lua_State* lua;
 
+int delay_timer;
+int sound_timer;
+
+std::default_random_engine generator{static_cast<long unsigned int>(time(0))};
+
+int ErrorHandler(lua_State *L){
+    std::cout<<lua_tostring(lua, -1)<<std::endl;
+    quit = true;
+    return 1;
+}
+
 int LuaClearScreen(lua_State *L){
+    if(lua_gettop(lua) != 0){
+        luaL_error(lua, "expecting no arguments");
+    }
+
     ClearScreen();
     return 0;
 }
 
 int LuaDraw(lua_State* L){
+    int start, len;
+    if(lua_gettop(lua) == 5){
+        start = luaL_checkinteger(lua, 4);
+        len = luaL_checkinteger(lua, 5);
+        luaL_argcheck(lua, (start >= 1), 4, "must be larger than 0");
+        luaL_argcheck(lua, (len >= 0 && len <= SCREEN_HEIGHT), 5, "must be between 0 and 31");
+    }
+    else if(lua_gettop(lua) == 3){
+        start = 1;
+        len = SCREEN_HEIGHT;
+    }
+    else{
+        luaL_error(lua, "expecting either 3 or 5 arguments");
+    }
+    
     bool result = false;
-    int y = luaL_checkinteger(lua, -1);
-    int x = luaL_checkinteger(lua, -2);
-    lua_pop(lua, 2);
-    for(int i = 1; i <= SCREEN_HEIGHT; i++){
-        lua_geti(lua, -1, i);
+    int x = luaL_checkinteger(lua, 2);
+    int y = luaL_checkinteger(lua, 3);
+
+    luaL_argcheck(lua, lua_istable(lua, 1), 1, "must be a table");
+    luaL_argcheck(lua, (x >= 0 && x < SCREEN_WIDTH), 2, "must be between 0 and 63");
+    luaL_argcheck(lua, (y >= 0 && y < SCREEN_HEIGHT), 3, "must be between 0 and 31");
+
+    for(int i = start; i < start + len; i++){
+        lua_geti(lua, 1, i);
         if(lua_isnil(lua, -1)){
             lua_pop(lua, 2);
             break;
         }
         int b = luaL_checkinteger(lua, -1);
+        if(b < 0 || b > 255)
+        {
+            luaL_error(lua, "can't draw %d, must be between 0 and 255", b);
+        }
         if(!result && DrawByte(b, x, y+i-1)){
             result = true;
         }
@@ -58,12 +97,20 @@ int LuaDraw(lua_State* L){
 }
 
 int LuaRnd(lua_State* L){
+    if(lua_gettop(lua) != 1){
+        luaL_error(lua, "expecting 1 argument");
+    }
+
     int value = luaL_checkinteger(lua, -1);
     lua_pop(lua, 1);
 
-    int r = rand() % 256;
-    int new_num = r & value;
+    luaL_argcheck(lua, (value >=0 && value <= 255), 1, "must be between 0 and 255");
 
+    std::uniform_int_distribution<int> distribution(0, value - 1);
+    distribution(generator);
+    int r = distribution(generator);
+    int new_num = r % value;
+    //std::cout<<"generated "<<new_num<<std::endl;
     lua_pushinteger(lua, new_num);
     return 1;
 }
@@ -93,29 +140,38 @@ static void dumpstack (lua_State *L) {
 }
 
 int LuaKeyPressed(lua_State* L){
+    if(lua_gettop(lua) != 1){
+        luaL_error(lua, "expecting 1 argument");
+    }
+
     int result = 0;
     int value = luaL_checkinteger(lua, -1);
+    luaL_argcheck(lua, (value >= 0 && value <= 15), 1, "must be between 0 and 15");
     lua_pop(lua, 1);
-    if(value < 0 || value > 15){
-        return luaL_error(lua, "Key being checked is out of the range 0-15");
-    }
     lua_pushboolean(lua, IsKeyPressed(value));
     return 1;
 }
 
 int LuaKeyReleased(lua_State* L){
+    if(lua_gettop(lua) != 1){
+        luaL_error(lua, "expecting 1 argument");
+    }
+
     int result = 0;
     int value = luaL_checkinteger(lua, -1);
+    luaL_argcheck(lua, (value >= 0 && value <= 15), 1, "must be between 0 and 15");
     lua_pop(lua, 1);
-    if(value < 0 || value > 15){
-        return luaL_error(lua, "Key being checked is out of the range 0-15");
-    }
     lua_pushboolean(lua, IsKeyReleased(value));
     return 1;
 }
 
 int LuaBcd(lua_State* L){
+    if(lua_gettop(lua) != 1){
+        luaL_error(lua, "expecting 1 argument");
+    }
+
     int value = luaL_checkinteger(lua, -1);
+    luaL_argcheck(lua, (value >= 0 && value <= 2555), 1, "must be between 0 and 255");
     lua_pop(lua, 1);
     lua_newtable(lua);
     lua_pushinteger(lua, value / 100);
@@ -128,11 +184,13 @@ int LuaBcd(lua_State* L){
 }
 
 int LuaGetSprite(lua_State* L){
-    int value = luaL_checkinteger(lua, -1);
-    lua_pop(lua, 1);
-    if(value < 0 || value > 15){
-        return luaL_error(lua, "The value for get_sprite is not between 0 and 15");
+    if(lua_gettop(lua) != 1){
+        luaL_error(lua, "expecting 1 argument");
     }
+
+    int value = luaL_checkinteger(lua, -1);
+    luaL_argcheck(lua, (value >= 0 && value <= 15), 1, "must be between 0 and 15");
+    lua_pop(lua, 1);
     lua_createtable(lua, 5, 0);
     for(int i = 1; i <= 5; i++){
         lua_pushinteger(lua, font[value][i-1]);
@@ -142,6 +200,8 @@ int LuaGetSprite(lua_State* L){
 }
 
 void CreateLua(){
+    delay_timer = 0;
+    sound_timer = 0;
     lua = luaL_newstate();
     luaL_openlibs(lua);
 
@@ -158,20 +218,20 @@ bool LoadFile(char* fileName){
     if(luaL_dofile(lua, fileName) == LUA_OK){
         return true;
     }
+    std::cout<<lua_tostring(lua, -1)<<std::endl;
     return false;
 }
 
-void RunLua(){
-    if(lua_pcall(lua, 0, LUA_MULTRET, 0) == LUA_OK){
-        lua_pop(lua, lua_gettop(lua));
-    }
-}
-
 void CallVBlank(){
+    lua_pushcfunction(lua, ErrorHandler);
     lua_getglobal(lua, VBLANK_FUNCTION);
-    if(lua_isfunction(lua, -1)){
-        lua_pcall(lua, 0, LUA_MULTRET, 0);
+    if(lua_isfunction(lua, -1)){ 
+        lua_pcall(lua, 0, 0, -2);
     }
+    else {
+        std::cout<<"error: no function vblank()"<<std::endl;
+        quit = true;
+    }  
 }
 
 void ProcessDelayTimer(){
@@ -203,12 +263,16 @@ void ProcessSoundTimer(){
     }
 
     if(sound_timer != 0){
-        UnpauseSound();
+        if(paused){
+            UnpauseSound(); 
+        }    
     }
     else{
-        PauseSound();
+        if(!paused){
+            PauseSound();
+        } 
     }
-   // std::cout<<"sound_timer "<<sound_timer<<std::endl;
+  // std::cout<<"sound_timer "<<sound_timer<<" paused "<<paused<<std::endl;
     lua_pushinteger(lua, sound_timer);
     lua_setglobal(lua, SOUND_TIMER_VARIABLE);
 }
