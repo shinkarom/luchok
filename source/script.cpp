@@ -239,6 +239,9 @@ void CallVBlank(){
 void ProcessDelayTimer(){
     lua_getglobal(lua, DELAY_TIMER_VARIABLE);
     delay_timer = lua_tointeger(lua, -1);
+    if(delay_timer < -255 || delay_timer > 255){
+        luaL_error(lua, "delay_timer must be from 0 to 255");
+    }
     lua_pop(lua, 1);
 
     if(delay_timer > 0){
@@ -255,6 +258,9 @@ void ProcessDelayTimer(){
 void ProcessSoundTimer(){
     lua_getglobal(lua, SOUND_TIMER_VARIABLE);
     sound_timer = lua_tointeger(lua, -1);
+    if(sound_timer < -255 || sound_timer > 255){
+        luaL_error(lua, "sound_timer must be from 0 to 255");
+    }
     lua_pop(lua, 1);
 
     if(sound_timer > 0){
