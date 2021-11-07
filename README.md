@@ -39,6 +39,22 @@ The API for the fantasy console is:
 * `delay_timer` (0-255) - decrements every frame until it hits 0
 * `sound_timer` (0-255) - decrements every frame until it hits 0, each frame it's not 0 a buzzer sounds
 
+# Keys
+
+Luchok has 16 keys. They are located like this:
+
+1 2 3 C
+4 5 6 D
+7 8 9 E
+A 0 B F
+
+and mapped to:
+
+1 2 3 4
+Q W E R
+A S D F
+Z X C V
+
 # License
 GPL 3.
 
