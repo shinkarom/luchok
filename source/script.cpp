@@ -71,6 +71,8 @@ int LuaDraw(lua_State* L){
     int x = luaL_checkinteger(lua, 2);
     int y = luaL_checkinteger(lua, 3);
 
+   // std::cout<<"drawing at "<<x<<" "<<y<<std::endl;
+
     luaL_argcheck(lua, lua_istable(lua, 1), 1, "must be a table");
     luaL_argcheck(lua, (x >= 0 && x < SCREEN_WIDTH), 2, "must be between 0 and 63");
     luaL_argcheck(lua, (y >= 0 && y < SCREEN_HEIGHT), 3, "must be between 0 and 31");

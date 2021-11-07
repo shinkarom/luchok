@@ -1,12 +1,11 @@
-speed = 5
+speed = 12
 frames = 0
 segments = {}
 food = {}
 direction = {dx = 1, dy = 0}
-
-for i = 1,3 do
-    segments[i] = { x = 10 - i + 1, y = 10}
-end
+should_stop = false
+score = 0
+scene = 0
 
 function occupied(xx, yy)
     for i = 1, #segments do
@@ -16,8 +15,8 @@ function occupied(xx, yy)
 end
 
 function generate_food()
-    x = rnd(64)
-    y = rnd(32)
+    local x = rnd(64)
+    local y = rnd(32)
     while occupied(x, y) do
         x = rnd(64)
         y = rnd(32)
@@ -28,13 +27,30 @@ end
 
 generate_food()
 
+function init_game()
+    segments = {}
+    food = {}
+    direction = {dx = 1, dy = 0}
+    should_stop = false
+    score = 0
+    scene = 0
+
+    for i = 1,3 do
+        segments[i] = { x = 10 - i + 1, y = 10}
+    end
+
+    generate_food()
+end
+
+init_game()
+
 function move_snake()
     for i = #segments - 1, 1, -1 do
         segments[i+1].x = segments[i].x
         segments[i+1].y = segments[i].y
     end
-    segments[1].x = segments[1].x + direction.dx
-    segments[1].y = segments[1].y + direction.dy
+    segments[1].x = target.x
+    segments[1].y = target.y
 end
 
 function process_input()
@@ -56,21 +72,73 @@ function process_input()
     end 
 end
 
-function vblank()
-    frames = frames + 1
-    if frames % (60 / speed) == 0 then
-        move_snake()
-    end
-    process_input()
-    draw_it()
-end
-
 function draw_it()
+    draw(food_sprite, food.x, food.y)
     for i = 1, #segments do
         draw(segment, segments[i].x, segments[i].y)
-    end
-    draw(food_sprite, food.x, food.y)
+    end 
 end
 
-segment = {0x01}
-food_sprite = {0x01}
+function eat_food()
+    local new_segment = {x = food.x, y = food.y}
+    table.insert(segments, 1, new_segment)
+    generate_food()
+    score = score + 1
+    sound_timer = 15
+end
+
+function stop()
+    should_stop = true
+    sound_timer = 45
+    scene = 1
+end
+
+function collision_with_snake()
+    for i=2,#segments do
+        if target.x == segments[i].x and target.y == segments[i].y then
+            stop()
+        end
+    end
+end
+
+function collision_with_wall()
+    if (target.x <= 0) or 
+    (target.x >= 63) or 
+    (target.y <= 0) or 
+    (target.y >= 31) then
+        stop()
+    end
+end
+
+function vblank()
+    if scene == 0 then
+        if not should_stop then
+            frames = frames + 1
+            if frames % speed == 0 then
+                target = {x = segments[1].x + direction.dx,
+                        y = segments[1].y + direction.dy}
+                if target.x == food.x and target.y == food.y then
+                    eat_food()
+                else
+                    move_snake()
+                    collision_with_snake()
+                    collision_with_wall()
+                end      
+            end
+            process_input()
+        end
+        draw_it()
+    elseif scene == 1 then
+        local digits = bcd(score)
+        draw(get_sprite(digits[1]), 20, 15)
+        draw(get_sprite(digits[2]), 25, 15)
+        draw(get_sprite(digits[3]), 30, 15)
+        if key_released(5) then
+            init_game()
+            scene = 0
+        end
+    end
+end
+
+segment = {0x80}
+food_sprite = {0x80}

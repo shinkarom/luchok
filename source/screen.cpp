@@ -7,7 +7,6 @@ static SDL_Window* window;
 static SDL_Renderer* renderer;
 static SDL_Texture* texture;
 
-bool pixels[SCREEN_WIDTH * SCREEN_HEIGHT];
 uint32_t frameBuffer[SCREEN_WIDTH * SCREEN_HEIGHT];
 
 void CreateScreen(){
@@ -20,10 +19,6 @@ void CreateScreen(){
 
     texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, 
         SDL_TEXTUREACCESS_STREAMING, SCREEN_WIDTH, SCREEN_HEIGHT);
-
-    for(int i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; i++){
-        pixels[i] = false;
-    }
 
     SDL_ShowWindow(window);
 }
@@ -41,22 +36,27 @@ bool DrawByte(int value, int x, int y){
     for(int i = 0; i < 8; i++){
         bool thisBit = (value >> (7 - i)) & 1;
         auto thisColor = thisBit ? ON_COLOR : OFF_COLOR;
+
         int new_x = (x + i) % SCREEN_WIDTH;
         if(new_x < 0){
-            new_x = SCREEN_WIDTH - (-new_x);
+            new_x = SCREEN_WIDTH + new_x;
         }
+
         int new_y = y % SCREEN_HEIGHT;
         if(new_y < 0){
-            new_y = SCREEN_HEIGHT - (-new_y);
+            new_y = SCREEN_HEIGHT + new_y;
         }
-        int loc = new_y * SCREEN_WIDTH + new_x;
-        bool currentBit = frameBuffer[loc] == ON_COLOR;
+
+        //std::cout<<x<<" "<<y<<" "<<new_x<<" "<<new_y<<" "<<std::endl;
+
+        bool currentBit = GetPixel(new_x, new_y);
         if(!result && currentBit && thisBit)
         {
             result = true;
         }
+
         bool newBit = currentBit ^ thisBit;
-        frameBuffer[loc] = newBit ? ON_COLOR : OFF_COLOR;
+        SetPixel(new_x, new_y, newBit);
         //std::cout << x<< " " << y << " " 
         //    << currentBit << " " << thisBit << " " << 
         //    newBit << " " << result << std::endl;
