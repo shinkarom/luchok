@@ -1,3 +1,8 @@
+-- Snake game
+-- 2021 by Roman "shinkarom" Shynkarenko
+-- Controls: move snake with 2, 4, 6, 8 (internal controls, not keyboard keys)
+-- After game ends, restart it by pressiong 5 9again, the internal control)
+
 speed = 12
 frames = 0
 segments = {}
