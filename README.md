@@ -43,17 +43,23 @@ The API for the fantasy console is:
 
 Luchok has 16 keys. They are located like this:
 
-1 2 3 C
-4 5 6 D
-7 8 9 E
-A 0 B F
+> 1 2 3 C
+> 
+> 4 5 6 D
+> 
+> 7 8 9 E
+> 
+> A 0 B F
 
 and mapped to:
 
-1 2 3 4
-Q W E R
-A S D F
-Z X C V
+> 1 2 3 4
+> 
+> Q W E R
+> 
+> A S D F
+> 
+> Z X C V
 
 # License
 GPL 3.
