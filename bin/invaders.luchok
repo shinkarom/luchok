@@ -1,0 +1,125 @@
+function init(s)
+  move_delta=-1
+  invader_y=0
+  invaders={
+    {x=10, y=0, live=true},
+    {x=20, y=0, live=true},
+    {x=40, y=0, live=true},
+    {x=50, y=0, live=true},
+    {x=15, y=8, live=true},
+    {x=25, y=8, live=true},
+    {x=45, y=8, live=true},
+    {x=55, y=8, live=true},
+  }
+  invader_speed=s
+end
+start_invader_speed=10
+init(start_invader_speed)
+
+function vblank()
+  counter=counter+1
+  cls()
+  --if counter==60 then counter=0 end
+  process_keys()
+  draw(ship.sprite, ship.x, ship.y)
+  if ship.shooting then
+    process_bullet()
+    draw(bullet.sprite, bullet.x, bullet.y)
+  end
+  if counter%(invader_speed+1)==0 then
+    process_invaders()
+  end
+  draw_invaders()
+end
+
+function process_keys()
+  if key_pressed(4) and ship.x>0 then
+    ship.x=ship.x-1
+  elseif key_pressed(6) and ship.x <=63-7 then
+    ship.x = ship.x + 1
+  elseif key_pressed(5) and not ship.shooting then
+    shoot()
+  end
+end
+
+function shoot()
+  ship.shooting = true
+  bullet.x=ship.x+3
+  bullet.y=ship.y-1
+end
+
+function process_bullet()
+  if bullet.y>0 then
+    bullet.y = bullet.y-1
+  else
+    ship.shooting=false
+  end
+  for i,inv in pairs(invaders) do
+    if inv.live and bullet.y<=inv.y+#invader_sprite and bullet.x>=inv.x and bullet.x<inv.x+8 then
+      ship.shooting=false
+      inv.live=false
+      sound_timer=4
+    end
+  end
+end
+
+function abs(x)
+  if x<0 then return -x else return x end
+end
+
+function process_one_invader(inv)
+end
+
+function process_invaders()
+  local drop=false
+  local alives=0
+  for i, inv in pairs(invaders) do
+    if inv.live and (inv.x<=0 or inv.x+7>=63) then
+      move_delta=-move_delta
+      drop=true
+    end
+  end
+  for i, inv in pairs(invaders) do
+    if inv.live then
+      alives=alives+1
+      inv.x=inv.x+move_delta
+      if drop then inv.y=inv.y+1 end
+      if inv.y+#invader_sprite>=32-#ship.sprite then
+	sound_timer=30
+	init(start_invader_speed)
+      end
+    end
+  end
+  if alives==0 then
+    sound_timer=15
+    init(invader_speed-1)
+  end
+end
+
+function draw_invaders()
+  for i, inv in pairs(invaders) do
+    if inv.live then
+      draw(invader_sprite, inv.x, inv.y)
+    end
+  end
+end
+
+ship = {
+  x=20,
+  y=28,
+  sprite={0x10, 0x38, 0x7C, 0xFE},
+  shooting=false
+}
+
+bullet = {
+  x=0,
+  y=0,
+  sprite={0x80}
+}
+
+counter=0
+
+leeway=5
+invader_sprite={0x3C, 0x7E, 0xFF, 0xFF, 0x99, 0x99}
+
+
